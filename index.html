@@ -1,1 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Velvet — Salon Business Manager</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= SPLASH ================= -->
+<section class="screen active" id="screen-splash">
+  <div class="splash">
+    <div class="splash-mark">V</div>
+    <h1 class="splash-title">Velvet</h1>
+    <p class="splash-sub">Run your salon from your pocket</p>
+    <div class="splash-loader"><span></span></div>
+  </div>
+</section>
+
+<!-- ================= LOGIN ================= -->
+<section class="screen" id="screen-login">
+  <div class="auth-wrap">
+    <div class="auth-mark">V</div>
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Sign in to manage today's business</p>
+
+    <div class="role-toggle" id="roleToggle">
+      <button type="button" class="role-btn active" data-role="Owner">Owner</button>
+      <button type="button" class="role-btn" data-role="Manager">Manager</button>
+    </div>
+
+    <label class="field">
+      <span>Mobile number</span>
+      <input type="tel" value="98765 43210" inputmode="numeric">
+    </label>
+    <label class="field">
+      <span>PIN</span>
+      <input type="password" value="1234">
+    </label>
+
+    <button class="btn btn-primary btn-block" data-nav="dashboard">Sign in</button>
+    <p class="auth-hint">Demo mode — any details will sign you in</p>
+  </div>
+</section>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app" class="app">
+
+  <!-- ---------- DASHBOARD ---------- -->
+  <section class="screen" id="screen-dashboard">
+    <header class="topbar">
+      <div>
+        <p class="topbar-eyebrow" id="dashGreeting">Good morning</p>
+        <h1 class="topbar-title" id="dashRole">Muthu — Owner</h1>
+      </div>
+      <button class="icon-btn" data-nav="notifications" aria-label="Notifications">
+        <svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 0-5 5v3.2c0 .6-.2 1.2-.6 1.7L5 15h14l-1.4-2.1a2.8 2.8 0 0 1-.6-1.7V8a5 5 0 0 0-5-5Z"/><path d="M9.5 18a2.5 2.5 0 0 0 5 0"/></svg>
+        <span class="icon-dot"></span>
+      </button>
+    </header>
+
+    <div class="scroll-area">
+      <!-- 60 second snapshot -->
+      <div class="snapshot-card">
+        <div class="snapshot-ring">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" class="ring-track"/>
+            <circle cx="60" cy="60" r="52" class="ring-fill" id="ringFill"/>
+          </svg>
+          <div class="snapshot-ring-label">
+            <span id="ringPercent">78%</span>
+            <small>of today's target</small>
+          </div>
+        </div>
+        <div class="snapshot-copy">
+          <p class="snapshot-eyebrow">60-second summary</p>
+          <h2 id="snapshotHeadline">Strong day so far</h2>
+          <p class="snapshot-text" id="snapshotText">₹8,450 earned across 14 services. 2 payments pending, 3 items running low.</p>
+        </div>
+      </div>
+
+      <!-- stat grid -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span class="stat-label">Income today</span>
+          <span class="stat-value" id="statIncome">₹8,450</span>
+          <span class="stat-trend up">▲ 12% vs yesterday</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Expenses today</span>
+          <span class="stat-value" id="statExpense">₹1,200</span>
+          <span class="stat-trend down">▼ 4% vs yesterday</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Services done</span>
+          <span class="stat-value" id="statServices">14</span>
+          <span class="stat-trend neutral">6 walk-ins</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Pending payments</span>
+          <span class="stat-value" id="statPending">₹1,850</span>
+          <span class="stat-trend warn">2 customers</span>
+        </div>
+      </div>
+
+      <!-- quick actions -->
+      <div class="section-head"><h3>Quick actions</h3></div>
+      <div class="quick-grid">
+        <button class="quick-btn" data-nav="serviceEntry">
+          <span class="quick-icon">✂️</span>New service
+        </button>
+        <button class="quick-btn" data-nav="billing">
+          <span class="quick-icon">🧾</span>New bill
+        </button>
+        <button class="quick-btn" data-nav="addCustomer">
+          <span class="quick-icon">👤</span>Add customer
+        </button>
+        <button class="quick-btn" data-nav="addStock">
+          <span class="quick-icon">📦</span>Add stock
+        </button>
+      </div>
+
+      <!-- alerts -->
+      <div class="section-head"><h3>Needs attention</h3><button class="link-btn" data-nav="notifications">See all</button></div>
+      <div class="alert-list" id="dashAlerts"></div>
+
+      <!-- staff snapshot -->
+      <div class="section-head"><h3>Staff today</h3><button class="link-btn" data-nav="staffPerformance">View all</button></div>
+      <div class="staff-row" id="dashStaffRow"></div>
+
+      <!-- recent activity -->
+      <div class="section-head"><h3>Recent activity</h3><button class="link-btn" data-nav="reports">Reports</button></div>
+      <div class="activity-list" id="dashActivity"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- CUSTOMERS ---------- -->
+  <section class="screen" id="screen-customers">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Customers</h1>
+      <button class="icon-btn" data-nav="addCustomer" aria-label="Add customer">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </header>
+    <div class="scroll-area">
+      <div class="search-bar">
+        <input type="text" id="customerSearch" placeholder="Search by name or phone">
+      </div>
+      <div class="list" id="customerList"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- CUSTOMER DETAIL ---------- -->
+  <section class="screen" id="screen-customerDetail">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Customer</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area" id="customerDetailBody"></div>
+  </section>
+
+  <!-- ---------- ADD CUSTOMER ---------- -->
+  <section class="screen" id="screen-addCustomer">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Add customer</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <label class="field"><span>Full name</span><input type="text" id="newCustName" placeholder="e.g. Priya Ramesh"></label>
+      <label class="field"><span>Mobile number</span><input type="tel" id="newCustPhone" placeholder="98765 xxxxx"></label>
+      <label class="field"><span>Notes (optional)</span><input type="text" id="newCustNote" placeholder="Prefers herbal color, allergic to ammonia"></label>
+      <button class="btn btn-primary btn-block" id="saveCustomerBtn">Save customer</button>
+    </div>
+  </section>
+
+  <!-- ---------- SERVICE ENTRY ---------- -->
+  <section class="screen" id="screen-serviceEntry">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">New service</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <label class="field"><span>Customer</span>
+        <select id="svcCustomer"></select>
+      </label>
+      <label class="field"><span>Staff</span>
+        <select id="svcStaff"></select>
+      </label>
+      <p class="field-label">Select services</p>
+      <div class="chip-list" id="svcChipList"></div>
+      <div class="mini-summary">
+        <span>Total</span>
+        <strong id="svcTotal">₹0</strong>
+      </div>
+      <button class="btn btn-primary btn-block" id="svcContinueBtn">Continue to billing</button>
+    </div>
+  </section>
+
+  <!-- ---------- BILLING ---------- -->
+  <section class="screen" id="screen-billing">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Billing</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <div class="bill-card">
+        <div class="bill-row"><span>Customer</span><strong id="billCustomer">Walk-in</strong></div>
+        <div class="bill-row"><span>Staff</span><strong id="billStaff">—</strong></div>
+        <div class="bill-divider"></div>
+        <div id="billLines"></div>
+        <div class="bill-divider"></div>
+        <div class="bill-row bill-total"><span>Total</span><strong id="billTotal">₹0</strong></div>
+      </div>
+
+      <p class="field-label">Payment method</p>
+      <div class="pill-row" id="paymentMethods">
+        <button class="pill active" data-method="Cash">Cash</button>
+        <button class="pill" data-method="UPI">UPI</button>
+        <button class="pill" data-method="Card">Card</button>
+        <button class="pill" data-method="Pending">Mark pending</button>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="confirmBillBtn">Confirm &amp; generate bill</button>
+      <button class="btn btn-ghost btn-block" data-nav="dashboard">Cancel</button>
+    </div>
+  </section>
+
+  <!-- ---------- BILL SUCCESS ---------- -->
+  <section class="screen" id="screen-billSuccess">
+    <div class="success-wrap">
+      <div class="success-mark">✓</div>
+      <h1>Bill generated</h1>
+      <p id="billSuccessText">₹950 collected from Priya Ramesh via UPI</p>
+      <button class="btn btn-primary btn-block" data-nav="dashboard">Back to dashboard</button>
+      <button class="btn btn-ghost btn-block" data-nav="serviceEntry">Start another service</button>
+    </div>
+  </section>
+
+  <!-- ---------- STAFF MANAGEMENT ---------- -->
+  <section class="screen" id="screen-staff">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Staff</h1>
+      <button class="icon-btn" aria-label="Add staff">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </header>
+    <div class="scroll-area">
+      <div class="list" id="staffList"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- STAFF PERFORMANCE ---------- -->
+  <section class="screen" id="screen-staffPerformance">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Staff performance</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <div class="pill-row">
+        <button class="pill active">This week</button>
+        <button class="pill">This month</button>
+      </div>
+      <div class="list" id="staffPerfList"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- INVENTORY ---------- -->
+  <section class="screen" id="screen-inventory">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Inventory</h1>
+      <button class="icon-btn" data-nav="addStock" aria-label="Add stock">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </header>
+    <div class="scroll-area">
+      <div class="pill-row" id="invFilter">
+        <button class="pill active" data-cat="All">All</button>
+        <button class="pill" data-cat="Hair">Hair</button>
+        <button class="pill" data-cat="Skin">Skin</button>
+        <button class="pill" data-cat="Consumables">Consumables</button>
+      </div>
+      <div class="list" id="inventoryList"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- ADD STOCK ---------- -->
+  <section class="screen" id="screen-addStock">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Add stock</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <label class="field"><span>Product</span>
+        <select id="stockProduct"></select>
+      </label>
+      <label class="field"><span>Quantity received</span><input type="number" id="stockQty" value="10"></label>
+      <label class="field"><span>Supplier</span>
+        <select id="stockSupplier"></select>
+      </label>
+      <label class="field"><span>Amount paid (₹)</span><input type="number" id="stockAmount" value="2500"></label>
+      <button class="btn btn-primary btn-block" id="saveStockBtn">Save stock entry</button>
+    </div>
+  </section>
+
+  <!-- ---------- SUPPLIERS ---------- -->
+  <section class="screen" id="screen-suppliers">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Suppliers</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <div class="list" id="supplierList"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- PURCHASES ---------- -->
+  <section class="screen" id="screen-purchases">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Purchase history</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <div class="list" id="purchaseList"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- EXPENSES ---------- -->
+  <section class="screen" id="screen-expenses">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Expenses</h1>
+      <button class="icon-btn" id="addExpenseBtn" aria-label="Add expense">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </header>
+    <div class="scroll-area">
+      <div class="stat-strip">
+        <div><span>Today</span><strong id="expToday">₹1,200</strong></div>
+        <div><span>This week</span><strong id="expWeek">₹6,850</strong></div>
+        <div><span>This month</span><strong id="expMonth">₹24,300</strong></div>
+      </div>
+      <div class="list" id="expenseList"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- Add expense sheet -->
+  <div class="sheet-overlay" id="expenseSheetOverlay">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h3>Add expense</h3>
+      <label class="field"><span>Category</span>
+        <select id="expCategory">
+          <option>Rent</option><option>Electricity</option><option>Staff advance</option><option>Maintenance</option><option>Tea &amp; snacks</option><option>Other</option>
+        </select>
+      </label>
+      <label class="field"><span>Amount (₹)</span><input type="number" id="expAmount" value="500"></label>
+      <label class="field"><span>Note</span><input type="text" id="expNote" placeholder="Optional"></label>
+      <button class="btn btn-primary btn-block" id="saveExpenseBtn">Save expense</button>
+      <button class="btn btn-ghost btn-block" data-close-sheet="expenseSheetOverlay">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ---------- REPORTS ---------- -->
+  <section class="screen" id="screen-reports">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Reports</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <div class="pill-row">
+        <button class="pill active">Week</button>
+        <button class="pill">Month</button>
+        <button class="pill">Custom</button>
+      </div>
+      <div class="bar-chart" id="reportChart"></div>
+      <div class="section-head"><h3>Income vs expenses</h3></div>
+      <div class="report-summary">
+        <div><span>Income</span><strong class="up">₹58,200</strong></div>
+        <div><span>Expenses</span><strong class="down">₹24,300</strong></div>
+        <div><span>Net profit</span><strong>₹33,900</strong></div>
+      </div>
+      <div class="section-head"><h3>Top services</h3></div>
+      <div class="list" id="topServicesList"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- NOTIFICATIONS ---------- -->
+  <section class="screen" id="screen-notifications">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Notifications</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <div class="list" id="notificationList"></div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- PROFILE ---------- -->
+  <section class="screen" id="screen-profile">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Profile</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <div class="profile-card">
+        <div class="profile-avatar">M</div>
+        <h2 id="profileName">Muthuvelraja</h2>
+        <p id="profileShop">Velvet Salon &amp; Spa — Namakkal</p>
+      </div>
+      <div class="list">
+        <button class="row-item" data-nav="staff"><span>Staff management</span><span class="chev">›</span></button>
+        <button class="row-item" data-nav="suppliers"><span>Suppliers</span><span class="chev">›</span></button>
+        <button class="row-item" data-nav="reports"><span>Reports &amp; insights</span><span class="chev">›</span></button>
+        <button class="row-item" data-nav="settings"><span>Settings</span><span class="chev">›</span></button>
+      </div>
+      <button class="btn btn-ghost btn-block" data-nav="login">Sign out</button>
+    </div>
+  </section>
+
+  <!-- ---------- SETTINGS ---------- -->
+  <section class="screen" id="screen-settings">
+    <header class="topbar">
+      <button class="icon-btn" data-back aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 class="topbar-title">Settings</h1>
+      <span style="width:44px"></span>
+    </header>
+    <div class="scroll-area">
+      <p class="field-label">Language</p>
+      <div class="pill-row" id="langToggle">
+        <button class="pill active" data-lang="en">English</button>
+        <button class="pill" data-lang="ta">தமிழ்</button>
+      </div>
+
+      <p class="field-label">Preferences</p>
+      <div class="list">
+        <div class="row-item switch-row">
+          <span>Low stock alerts</span>
+          <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+        <div class="row-item switch-row">
+          <span>Daily WhatsApp summary to owner</span>
+          <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+        <div class="row-item switch-row">
+          <span>Pending payment reminders</span>
+          <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+        <div class="row-item switch-row">
+          <span>Customer birthday offers</span>
+          <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+        </div>
+      </div>
+      <p class="field-label">Business</p>
+      <div class="list">
+        <button class="row-item"><span>Daily income target (₹10,800)</span><span class="chev">›</span></button>
+        <button class="row-item"><span>Manage service menu</span><span class="chev">›</span></button>
+        <button class="row-item"><span>Backup &amp; export data</span><span class="chev">›</span></button>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+  </section>
+
+  <!-- ---------- MORE MENU SHEET ---------- -->
+  <div class="sheet-overlay" id="moreSheetOverlay">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h3>More</h3>
+      <div class="more-grid">
+        <button class="more-item" data-nav="staff"><span class="quick-icon">🧑‍🎨</span>Staff</button>
+        <button class="more-item" data-nav="staffPerformance"><span class="quick-icon">📈</span>Performance</button>
+        <button class="more-item" data-nav="suppliers"><span class="quick-icon">🚚</span>Suppliers</button>
+        <button class="more-item" data-nav="purchases"><span class="quick-icon">🧺</span>Purchases</button>
+        <button class="more-item" data-nav="expenses"><span class="quick-icon">💸</span>Expenses</button>
+        <button class="more-item" data-nav="reports"><span class="quick-icon">📊</span>Reports</button>
+        <button class="more-item" data-nav="notifications"><span class="quick-icon">🔔</span>Alerts</button>
+        <button class="more-item" data-nav="profile"><span class="quick-icon">⚙️</span>Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- BOTTOM NAV ---------- -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" data-nav="dashboard" data-navroot="dashboard">
+      <svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-nav="customers" data-navroot="customers">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+      <span>Customers</span>
+    </button>
+    <button class="nav-item nav-item-fab" data-nav="billing" data-navroot="billing">
+      <span class="fab">＋</span>
+      <span>Bill</span>
+    </button>
+    <button class="nav-item" data-nav="inventory" data-navroot="inventory">
+      <svg viewBox="0 0 24 24"><path d="M3 8l9-4 9 4-9 4-9-4Z"/><path d="M3 8v8l9 4 9-4V8"/></svg>
+      <span>Inventory</span>
+    </button>
+    <button class="nav-item" id="moreNavBtn" data-navroot="more">
+      <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+      <span>More</span>
+    </button>
+  </nav>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
 
